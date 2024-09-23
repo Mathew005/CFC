@@ -26,38 +26,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($data->action === 'login') {
             $email = $data->email;
             $password = $data->password;
-
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+        
+            // Check for participant first
+            $stmt = $pdo->prepare("SELECT * FROM participants WHERE email = ?");
             $stmt->execute([$email]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC); // Use associative array
-
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+            if (!$user) {
+                // If not found in participants, check organizers
+                $stmt = $pdo->prepare("SELECT * FROM organizers WHERE email = ?");
+                $stmt->execute([$email]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+        
             if ($user && password_verify($password, $user['password'])) {
                 echo json_encode(["success" => true, "message" => "Login successful", "user" => $user]);
             } else {
                 echo json_encode(["success" => false, "message" => "Invalid email or password"]);
             }
-        } elseif ($data->action === 'register') {
+        }
+         elseif ($data->action === 'register') {
             $email = $data->email;
             $password = password_hash($data->password, PASSWORD_DEFAULT);
             $userType = $data->userType;
-
-            // Prepare the insert statement
-            $stmt = $pdo->prepare("INSERT INTO users (email, password, user_type, full_name, organization_name, address, contact_number, country_code, interests, website) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-            // Conditional fields based on user type
-            $fullName = $userType === 'participant' ? $data->fullName : null;
-            $organizationName = $userType === 'organizer' ? $data->organizationName : null;
-            $address = $userType === 'organizer' ? $data->address : null;
-            $interests = $userType === 'participant' ? $data->interests : null;
-            $website = $userType === 'organizer' ? $data->website : null;
-
-            // Execute the statement
-            if ($stmt->execute([$email, $password, $userType, $fullName, $organizationName, $address, $data->contactNumber, $data->countryCode, $interests, $website])) {
-                echo json_encode(["success" => true, "message" => "Registration successful"]);
+        
+            if ($userType === 'participant') {
+                $fullName = $data->fullName;
+                $interests = $data->interests;
+        
+                $stmt = $pdo->prepare("INSERT INTO participants (email, password, full_name, interests, contact_number, country_code) VALUES (?, ?, ?, ?, ?, ?)");
+                if ($stmt->execute([$email, $password, $fullName, $interests, $data->contactNumber, $data->countryCode])) {
+                    echo json_encode(["success" => true, "message" => "Participant registration successful"]);
+                } else {
+                    echo json_encode(["success" => false, "message" => "Participant registration failed"]);
+                }
+            } elseif ($userType === 'organizer') {
+                $organizationName = $data->organizationName;
+                $address = $data->address;
+                $website = $data->website;
+        
+                $stmt = $pdo->prepare("INSERT INTO organizers (email, password, organization_name, address, website, contact_number, country_code) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                if ($stmt->execute([$email, $password, $organizationName, $address, $website, $data->contactNumber, $data->countryCode])) {
+                    echo json_encode(["success" => true, "message" => "Organizer registration successful"]);
+                } else {
+                    echo json_encode(["success" => false, "message" => "Organizer registration failed"]);
+                }
             } else {
-                echo json_encode(["success" => false, "message" => "Registration failed"]);
+                echo json_encode(["success" => false, "message" => "Invalid user type"]);
             }
-        } else {
+        }
+         else {
             echo json_encode(["success" => false, "message" => "Invalid action"]);
         }
     } else {
