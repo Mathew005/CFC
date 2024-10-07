@@ -1,8 +1,10 @@
 <?php
+session_start();
+$_SESSION['display'] = '';
 // db_init.php
 
-require_once 'db_settings.php';
 require_once 'db_util.php';
+require_once 'db_settings.php';
 
 function db_create_database() {
     try {
@@ -20,49 +22,60 @@ function db_create_database() {
     }
 }
 
-function db_create_tables() {
+function db_create_tables_from_schemas($schema_dir) {
     $pdo = db_connect();
+    $schema_files = scandir($schema_dir);
+    $pending_schemas = [];
 
-    // Create participants table with participant_id as primary key
-    $sql_participants = "
-        CREATE TABLE IF NOT EXISTS participants (
-            participant_id INT AUTO_INCREMENT PRIMARY KEY,
-            email VARCHAR(255) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL,
-            full_name VARCHAR(255),
-            interests TEXT,
-            contact_number VARCHAR(20),
-            country_code VARCHAR(5),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-    ";
+    // Loop to process schemas until no pending foreign key errors remain
+    $max_attempts = 5; // Limit retries to avoid infinite loops
+    $attempt = 0;
 
-    // Create organizers table with organizer_id as primary key
-    $sql_organizers = "
-        CREATE TABLE IF NOT EXISTS organizers (
-            organizer_id INT AUTO_INCREMENT PRIMARY KEY,
-            email VARCHAR(255) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL,
-            organization_name VARCHAR(255),
-            address TEXT,
-            website VARCHAR(255),
-            contact_number VARCHAR(20),
-            country_code VARCHAR(5),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-    ";
+    while ($attempt < $max_attempts) {
+        $retry = false;
 
-    try {
-        $pdo->exec($sql_participants);
-        $pdo->exec($sql_organizers);
-    } catch (PDOException $e) {
-        die("Table creation failed: " . $e->getMessage());
-    } finally {
-        db_disconnect($pdo);
+        foreach ($schema_files as $schema_file) {
+            if ($schema_file === '.' || $schema_file === '..') {
+                continue;
+            }
+
+            $schema_path = $schema_dir . '/' . $schema_file;
+            $schema_sql = file_get_contents($schema_path);
+
+            try {
+                // Attempt to execute the schema creation
+                $pdo->exec($schema_sql);
+                $_SESSION['display'] .= "Successfully created table from $schema_file<br>";
+            } catch (PDOException $e) {
+                if (strpos($e->getMessage(), 'foreign key constraint') !== false) {
+                    // Foreign key constraint issue, retry later
+                    $_SESSION['display'] .= "Foreign key constraint issue: $schema_file. Will retry later.<br>";
+                    $retry = true;
+                    $pending_schemas[] = $schema_file;
+                } else {
+                    // Handle other errors
+                    $_SESSION['display'] .= "Error creating table from $schema_file: " . $e->getMessage() . "<br>";
+                }
+            }
+        }
+
+        if (!$retry) {
+            // If there are no pending schemas, exit the loop
+            break;
+        }
+
+        // Retry only the pending schemas in the next round
+        $schema_files = $pending_schemas;
+        $pending_schemas = [];  // Reset for next iteration
+        $attempt++;
+    }
+
+    if ($retry) {
+        $_SESSION['display'] .= "Failed to create some tables due to unresolved foreign key constraints.<br>";
     }
 }
 
 // Initialize the database and tables
 db_create_database();
-db_create_tables();
+db_create_tables_from_schemas(__DIR__ . '/schemas');
 ?>
