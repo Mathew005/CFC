@@ -75,29 +75,55 @@ if ($selected_table) {
             padding: 0;
         }
         .sidebar ul li {
-            padding: 10px;
-            cursor: pointer;
+            margin-bottom: 10px;
         }
-        .sidebar ul li:hover {
-            background-color: #f0f0f0;
+        .sidebar a {
+            display: inline-block;
+            width: 80%;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            font-weight: bold;
+            font-size: 16px;
         }
+        .sidebar a:hover {
+            background-color: #0056b3;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar a:focus, .sidebar a:active {
+            outline: none;
+            box-shadow: 0px 0px 8px #007BFF;
+        }
+
         .table-container {
             flex: 1;
+            overflow-x: auto; /* Allow horizontal scrolling */
         }
         table {
             width: 100%;
             border: 2px solid black;
             border-collapse: collapse;
+            min-width: 800px; /* Minimum width of the table */
         }
         th, td {
             border: 2px solid black;
             padding: 10px;
             text-align: left;
+            word-wrap: break-word; /* Ensure long words break to the next line */
         }
         th {
             background-color: #f2f2f2;
         }
         td {
+            text-align: center;
+        }
+        .empty-row {
+            font-weight: bold;
             text-align: center;
         }
     </style>
@@ -109,48 +135,57 @@ if ($selected_table) {
         <h3>Tables</h3>
         <ul>
             <?php foreach ($tables as $table): ?>
-                <li><a href="?table=<?php echo $table[
-                    'Tables_in_' . DB_NAME
-                ]; ?>"><?php echo $table['Tables_in_' . DB_NAME]; ?></a></li>
+                <li>
+                    <a href="?table=<?php echo $table[ 'Tables_in_' . DB_NAME ]; ?>">
+                        <?php echo $table['Tables_in_' . DB_NAME]; ?>
+                    </a>
+                </li>
             <?php endforeach; ?>
         </ul>
     </div>
 
     <!-- Main Content: Table Data -->
     <div class="table-container">
-        <?php if ($selected_table && $contents): ?>
-            <h3>Contents of Table: <?php echo htmlspecialchars(
-                $selected_table
-            ); ?></h3>
+        <?php if ($selected_table): ?>
+            <h3>Contents of Table: <?php echo htmlspecialchars($selected_table); ?></h3>
             <table>
                 <thead>
                     <tr>
-                        <?php if (count($contents) > 0): ?>
-                            <?php foreach (
-                                array_keys($contents[0])
-                                as $column
-                            ): ?>
-                                <th><?php echo htmlspecialchars(
-                                    $column
-                                ); ?></th>
+                        <?php if ($contents && count($contents) > 0): ?>
+                            <!-- Display headers based on the first row of data -->
+                            <?php foreach (array_keys($contents[0]) as $column): ?>
+                                <th><?php echo htmlspecialchars($column); ?></th>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <th>No data available</th>
+                            <!-- If no data, show headers by querying table structure -->
+                            <?php
+                            $pdo = db_connect();
+                            $sql = "DESCRIBE $selected_table";
+                            $columns = db_query($sql);
+                            foreach ($columns as $column): ?>
+                                <th><?php echo htmlspecialchars($column['Field']); ?></th>
+                            <?php endforeach; ?>
                         <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($contents as $row): ?>
+                    <?php if ($contents && count($contents) > 0): ?>
+                        <!-- Display rows if there is data -->
+                        <?php foreach ($contents as $row): ?>
+                            <tr>
+                                <?php foreach ($row as $column => $value): ?>
+                                    <td><?php echo htmlspecialchars($value); ?></td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <!-- Display "Empty" row if no data -->
                         <tr>
-                            <?php foreach ($row as $column => $value): ?>
-                                <td><?php echo htmlspecialchars($value); ?></td>
-                            <?php endforeach; ?>
+                            <td colspan="<?php echo count($columns); ?>" class="empty-row">Empty</td>
                         </tr>
-                    <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
-        <?php elseif ($selected_table): ?>
-            <p>No data available in the selected table.</p>
         <?php else: ?>
             <p>Please select a table to view its contents.</p>
         <?php endif; ?>

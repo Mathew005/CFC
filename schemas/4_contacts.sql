@@ -1,0 +1,7 @@
+
+CREATE TABLE Contacts (
+    ContactID INT AUTO_INCREMENT PRIMARY KEY,
+    ContactName VARCHAR(255) NOT NULL,
+    ContactEmail VARCHAR(255) NOT NULL,
+    ContactPhone VARCHAR(50) NOT NULL
+);
