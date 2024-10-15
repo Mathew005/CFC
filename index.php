@@ -12,28 +12,30 @@ if (session_status() == PHP_SESSION_NONE) {
 require_once 'db_util.php'; // Includes the database utility functions
 
 // Fetch the list of tables from the database
-function get_table_list() {
+function get_table_list()
+{
     $pdo = db_connect();
     try {
-        $sql = "SHOW TABLES";
+        $sql = 'SHOW TABLES';
         $tables = db_query($sql);
         return $tables;
     } catch (PDOException $e) {
-        die("Error fetching table list: " . $e->getMessage());
+        die('Error fetching table list: ' . $e->getMessage());
     } finally {
         db_disconnect($pdo);
     }
 }
 
 // Fetch the data of a specific table
-function get_table_data($table) {
+function get_table_data($table)
+{
     $pdo = db_connect();
     try {
         $sql = "SELECT * FROM $table";
         $data = db_query($sql);
         return $data;
     } catch (PDOException $e) {
-        die("Error fetching data from table: " . $e->getMessage());
+        die('Error fetching data from table: ' . $e->getMessage());
     } finally {
         db_disconnect($pdo);
     }
@@ -48,7 +50,6 @@ $contents = null;
 if ($selected_table) {
     $contents = get_table_data($selected_table);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -108,7 +109,9 @@ if ($selected_table) {
         <h3>Tables</h3>
         <ul>
             <?php foreach ($tables as $table): ?>
-                <li><a href="?table=<?php echo $table['Tables_in_' . DB_NAME]; ?>"><?php echo $table['Tables_in_' . DB_NAME]; ?></a></li>
+                <li><a href="?table=<?php echo $table[
+                    'Tables_in_' . DB_NAME
+                ]; ?>"><?php echo $table['Tables_in_' . DB_NAME]; ?></a></li>
             <?php endforeach; ?>
         </ul>
     </div>
@@ -116,13 +119,20 @@ if ($selected_table) {
     <!-- Main Content: Table Data -->
     <div class="table-container">
         <?php if ($selected_table && $contents): ?>
-            <h3>Contents of Table: <?php echo htmlspecialchars($selected_table); ?></h3>
+            <h3>Contents of Table: <?php echo htmlspecialchars(
+                $selected_table
+            ); ?></h3>
             <table>
                 <thead>
                     <tr>
                         <?php if (count($contents) > 0): ?>
-                            <?php foreach (array_keys($contents[0]) as $column): ?>
-                                <th><?php echo htmlspecialchars($column); ?></th>
+                            <?php foreach (
+                                array_keys($contents[0])
+                                as $column
+                            ): ?>
+                                <th><?php echo htmlspecialchars(
+                                    $column
+                                ); ?></th>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <th>No data available</th>
