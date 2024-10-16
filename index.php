@@ -41,6 +41,12 @@ function get_table_data($table)
     }
 }
 
+// Identify if a column is a password column
+function is_password_column($column_name)
+{
+    return stripos($column_name, 'password') !== false;
+}
+
 // Get the list of tables to display
 $tables = get_table_list();
 
@@ -136,8 +142,8 @@ if ($selected_table) {
         <ul>
             <?php foreach ($tables as $table): ?>
                 <li>
-                    <a href="?table=<?php echo $table[ 'Tables_in_' . DB_NAME ]; ?>">
-                        <?php echo $table['Tables_in_' . DB_NAME]; ?>
+                    <a href="?table=<?php echo $table['Tables_in_' . DB_NAME]; ?>">
+                        <?php echo htmlspecialchars($table['Tables_in_' . DB_NAME]); ?>
                     </a>
                 </li>
             <?php endforeach; ?>
@@ -174,7 +180,16 @@ if ($selected_table) {
                         <?php foreach ($contents as $row): ?>
                             <tr>
                                 <?php foreach ($row as $column => $value): ?>
-                                    <td><?php echo htmlspecialchars($value); ?></td>
+                                    <td>
+                                        <?php 
+                                        // Check if the current column is a password column
+                                        if (is_password_column($column)) {
+                                            echo '******'; // Mask the password
+                                        } else {
+                                            echo htmlspecialchars($value); // Display the value normally
+                                        }
+                                        ?>
+                                    </td>
                                 <?php endforeach; ?>
                             </tr>
                         <?php endforeach; ?>

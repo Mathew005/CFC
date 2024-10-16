@@ -4,6 +4,7 @@ CREATE TABLE Participants (
     ParticipantName VARCHAR(255) NOT NULL,
     ParticipantEmail VARCHAR(255) NOT NULL UNIQUE,
     ParticipantPassword VARCHAR(255) NOT NULL,
+    ParticipantImage VARCHAR(255),
     ParticipantPhone VARCHAR(50),
     ParticipantImage VARCHAR(255),
     ParticipantCourse VARCHAR(255),
