@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Login Attempt: Email = " . $email);
         
             // Try fetching from the participants table
-            $user = get_data('Participants', 'ParticipantEmail', $email);
+            $user = get_data('Participants', 'PEmail', $email);
         
             // Log what was returned
             error_log("Fetched from Participants: " . json_encode($user));
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // If not found in participants, try fetching from the organizers table
             if (!$user) {
                 error_log("Email not found in Participants: " . $email);
-                $user = get_data('Organizers', 'OrganizerEmail', $email);
+                $user = get_data('Organizers', 'OEmail', $email);
                 
                 // Log what was returned from organizers
                 error_log("Fetched from Organizers: " . json_encode($user));
@@ -60,18 +60,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
             // Check if the user exists and verify the password
             if ($user) {
-                $isParticipant = isset($user['ParticipantPassword']);
-                $isOrganizer = isset($user['OrganizerPassword']);
+                $isParticipant = isset($user['PPassword']);
+                $isOrganizer = isset($user['OPassword']);
         
-                if (($isParticipant && password_verify($password, $user['ParticipantPassword'])) || 
-                    ($isOrganizer && password_verify($password, $user['OrganizerPassword']))) {
+                if (($isParticipant && $password === $user['PPassword']) || 
+                    ($isOrganizer && $password === $user['OPassword'])) {
                     $response = [
                         "success" => true,
                         "message" => "Login successful",
                         "user" => [
-                            "id" => $isParticipant ? $user['ParticipantID'] : $user['OrganizerID'],
-                            "email" => $isParticipant ? $user['ParticipantEmail'] : $user['OrganizerEmail'],
-                            "name" => $isParticipant ? $user['ParticipantName'] : $user['OrganizerName'],
+                            "id" => $isParticipant ? $user['PID'] : $user['OID'],
+                            "email" => $isParticipant ? $user['PEmail'] : $user['OEmail'],
+                            "name" => $isParticipant ? $user['PName'] : $user['OName'],
                             "userType" => $isParticipant ? 'participant' : 'organizer'
                         ]
                     ];
@@ -83,17 +83,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo json_encode(["success" => false, "message" => "Invalid email or password"]);
             }
         }
-         elseif ($data->action === 'register') {
+        elseif ($data->action === 'register') {
             $email = $data->email;
-            $password = password_hash($data->password, PASSWORD_DEFAULT);  // Hash the password
+            $password = $data->password;  // Store the password as plain text
             $userType = $data->userType;
 
             // Debugging: log registration attempt
             error_log("Registration Attempt: Email = " . $email . ", UserType = " . $userType);
 
             // Check if the email already exists in either table
-            $existingParticipant = get_data('participants', 'ParticipantEmail', $email);
-            $existingOrganizer = get_data('organizers', 'OrganizerEmail', $email);
+            $existingParticipant = get_data('participants', 'PEmail', $email);
+            $existingOrganizer = get_data('organizers', 'OEmail', $email);
             
             if ($existingParticipant || $existingOrganizer) {
                 echo json_encode(["success" => false, "message" => "Email already registered as " . ($existingParticipant ? "a Participant" : "an Organizer")]);
@@ -107,16 +107,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $contactNumber = $data->contactNumber;
                 $countryCode = $data->countryCode;
 
-                // Combine country code and phone number
-                $phoneWithCountryCode = $countryCode . $contactNumber;
-
                 // Debugging: log SQL for participant registration
-                $sql = "INSERT INTO participants (ParticipantEmail, ParticipantPassword, ParticipantName, ParticipantPhone) VALUES (?, ?, ?, ?)";
+                $sql = "INSERT INTO participants (PEmail, PPassword, PName, PCode, PPhone) VALUES (?, ?, ?, ?, ?)";
                 error_log("SQL: " . $sql);  // Log the SQL query
-                error_log("Params: " . json_encode([$email, $password, $fullName, $phoneWithCountryCode]));  // Log the parameters
+                error_log("Params: " . json_encode([$email, $password, $fullName, $countryCode, $contactNumber]));  // Log the parameters
 
                 // Insert into participants table
-                $newUserId = db_insert($sql, [$email, $password, $fullName, $phoneWithCountryCode]);
+                $newUserId = db_insert($sql, [$email, $password, $fullName, $countryCode, $contactNumber]);
 
                 if ($newUserId) {
                     error_log("Db Insertion Success");
@@ -142,16 +139,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $contactNumber = $data->contactNumber;
                 $countryCode = $data->countryCode;
 
-                // Combine country code and phone number for organizer
-                $phoneWithCountryCode = $countryCode . $contactNumber;
-
                 // Debugging: log SQL for organizer registration
-                $sql = "INSERT INTO organizers (OrganizerEmail, OrganizerPassword, OrganizerName, OrganizerAddress, OrganizerWebsite, OrganizerPhone) VALUES (?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO organizers (OEmail, OPassword, OName, OAddress, OWebsite, OCode ,OPhone) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 error_log("SQL: " . $sql);  // Log the SQL query
-                error_log("Params: " . json_encode([$email, $password, $organizationName, $address, $website, $phoneWithCountryCode]));  // Log the parameters
+                error_log("Params: " . json_encode([$email, $password, $organizationName, $address, $website, $countryCode, $contactNumber]));  // Log the parameters
 
                 // Insert into organizers table
-                $newUserId = db_insert($sql, [$email, $password, $organizationName, $address, $website, $phoneWithCountryCode]);
+                $newUserId = db_insert($sql, [$email, $password, $organizationName, $address, $website, $countryCode, $contactNumber]);
 
                 if ($newUserId) {
                     echo json_encode([ 

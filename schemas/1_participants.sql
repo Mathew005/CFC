@@ -1,15 +1,15 @@
 
 CREATE TABLE Participants (
-    ParticipantID INT AUTO_INCREMENT PRIMARY KEY,
-    ParticipantName VARCHAR(255) NOT NULL,
-    ParticipantEmail VARCHAR(255) NOT NULL UNIQUE,
-    ParticipantPassword VARCHAR(255) NOT NULL,
-    ParticipantImage VARCHAR(255),
-    ParticipantPhone VARCHAR(50),
-    ParticipantImage VARCHAR(255),
-    ParticipantCourse VARCHAR(255),
-    ParticipantDepartment VARCHAR(255),
-    ParticipantInstitute VARCHAR(255),
-    ParticipantLocation VARCHAR(255),
-    ParticipantInterests TEXT
+    PID INT AUTO_INCREMENT PRIMARY KEY,
+    PName VARCHAR(255) NOT NULL,
+    PEmail VARCHAR(255) NOT NULL UNIQUE,
+    PPassword VARCHAR(255) NOT NULL,
+    PImage VARCHAR(255),
+    PCode VARCHAR(50),
+    PPhone VARCHAR(50),
+    PCourse VARCHAR(255),
+    PDepartment VARCHAR(255),
+    PInstitute VARCHAR(255),
+    PLocation VARCHAR(255),
+    PInterests TEXT
 );

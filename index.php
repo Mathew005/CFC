@@ -138,7 +138,7 @@ if ($selected_table) {
 
     <!-- Sidebar: List of Tables -->
     <div class="sidebar">
-        <h3>Tables</h3>
+        <a href="http://localhost/phpmyadmin/" target="_blank"><h3>Tables</h3></a>
         <ul>
             <?php foreach ($tables as $table): ?>
                 <li>

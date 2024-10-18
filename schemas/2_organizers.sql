@@ -1,14 +1,14 @@
 
 CREATE TABLE Organizers (
-    OrganizerID INT AUTO_INCREMENT PRIMARY KEY,
-    OrganizerName VARCHAR(255) NOT NULL,
-    OrganizerEmail VARCHAR(255) NOT NULL UNIQUE,
-    OrganizerPassword VARCHAR(255) NOT NULL,
-    OrganizerImage VARCHAR(255),
-    OrganizerWebsite VARCHAR(255),
-    OrganizerAddress VARCHAR(255),
-    OrganizerPhone VARCHAR(50),
-    OrganizerImage VARCHAR(255),
-    OrganizerInstitute VARCHAR(255),
-    OrganizerGPS VARCHAR(100)
+    OID INT AUTO_INCREMENT PRIMARY KEY,
+    OName VARCHAR(255) NOT NULL,
+    OEmail VARCHAR(255) NOT NULL UNIQUE,
+    OPassword VARCHAR(255) NOT NULL,
+    OImage VARCHAR(255),
+    OWebsite VARCHAR(255),
+    OAddress VARCHAR(255),
+    OCode VARCHAR(50),
+    OPhone VARCHAR(50),
+    OInstitute VARCHAR(255),
+    OGPS VARCHAR(100)
 );
