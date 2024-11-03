@@ -40,13 +40,6 @@ function get_table_data($table)
         db_disconnect($pdo);
     }
 }
-
-// Identify if a column is a password column
-function is_password_column($column_name)
-{
-    return stripos($column_name, 'password') !== false;
-}
-
 // Get the list of tables to display
 $tables = get_table_list();
 
@@ -182,12 +175,8 @@ if ($selected_table) {
                                 <?php foreach ($row as $column => $value): ?>
                                     <td>
                                         <?php 
-                                        // Check if the current column is a password column
-                                        if (is_password_column($column)) {
-                                            echo '******'; // Mask the password
-                                        } else {
                                             echo htmlspecialchars($value); // Display the value normally
-                                        }
+                                        
                                         ?>
                                     </td>
                                 <?php endforeach; ?>
