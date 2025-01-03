@@ -56,6 +56,18 @@ function db_insert($sql, $params = []) {
     }
 }
 
+function db_insert_2($pdo, $sql, $params = []) {
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        return $pdo->lastInsertId(); // Get the last inserted ID
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        die("Insertion failed: " . $e->getMessage());
+    }
+}
+
+
 // Utility to fetch single row data
 function get_data($table, $column, $key) {
     $pdo = db_connect();
@@ -107,4 +119,10 @@ function get_datas($table, $columns, $keys) {
         db_disconnect($pdo);
     }
 }
+
+function db_last_insert_id() {
+    $pdo = db_connect();
+    return $pdo->lastInsertId();
+}
+
 ?>

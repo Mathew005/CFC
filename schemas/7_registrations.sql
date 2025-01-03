@@ -10,8 +10,6 @@ CREATE TABLE Registrations (
     AdditionParticipantNames TEXT,
     AdditionParticipantEmail TEXT,
     AdditionParticipantPhone TEXT,
-    CID INT,
     FOREIGN KEY (EID) REFERENCES Events(EID),
-    FOREIGN KEY (CID) REFERENCES Contacts(CID),
     FOREIGN KEY (PID) REFERENCES Programs(PID)
 );

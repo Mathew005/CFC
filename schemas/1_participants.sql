@@ -11,5 +11,7 @@ CREATE TABLE Participants (
     PDepartment VARCHAR(255),
     PInstitute VARCHAR(255),
     PLocation VARCHAR(255),
-    PInterests TEXT
+    PInterests TEXT,
+    PBookMarkEvent TEXT,
+    PBookMarkProgram TEXT
 );

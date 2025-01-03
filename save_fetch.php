@@ -65,6 +65,8 @@ if ($method == 'GET') {
 
         // Save the data to the specific column
         $sql = "UPDATE $table SET $columnTarget = :data WHERE $columnIdentifier = :id";
+
+        error_log("SQL QUARY: $sql");
         $params = [
             ':data' => $data,
             ':id' => $id
