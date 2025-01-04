@@ -2,6 +2,7 @@
 // db_util.php
 
 require_once 'db_settings.php';
+include_once 'db_init.php';
 
 function db_connect() {
     try {
