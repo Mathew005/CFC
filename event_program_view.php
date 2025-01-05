@@ -18,6 +18,10 @@ include_once 'db_util.php';
 // Define the image host
 $img_host = DB_PROTOCOL . DB_HOST . "/" . DB_NAME . "/";
 
+// Log the incoming request for debugging
+error_log("Request received with id: " . $_GET['id']);
+
+// Try-catch block for error handling
 try {
     // Check if EID parameter is set
     if (!isset($_GET['id'])) {
@@ -26,6 +30,7 @@ try {
 
     // Get EID parameter
     $eid = $_GET['id'];
+    error_log("Fetching event data for EID: " . $eid); // Log EID
 
     // Fetch the event based on EID
     $event = db_query("SELECT * FROM Events WHERE EID = ?", [$eid]);
@@ -35,16 +40,24 @@ try {
     }
 
     $event = $event[0]; // Single event data
+    error_log("Event found: " . json_encode($event)); // Log event data for debugging
+
     $response = [];
 
     // Fetch programs for the event
     $programs = db_query("SELECT * FROM Programs WHERE EID = ?", [$event['EID']]);
+    error_log("Programs found: " . json_encode($programs)); // Log programs data
 
     // Structure programs data
     $programsData = [];
     foreach ($programs as $program) {
+        // Log each program being processed
+        error_log("Processing program: " . json_encode($program));
+
         // Fetch coordinators for the program
         $coordinators = db_query("SELECT * FROM Coordinators WHERE CID = ?", [$program['CID']]);
+        error_log("Coordinators found for program: " . json_encode($coordinators)); // Log coordinators data
+
         $coordinatorsData = [];
         foreach ($coordinators as $coordinator) {
             $coordinatorsData[] = [
@@ -74,6 +87,8 @@ try {
 
     // Fetch the event organizer
     $organizer = db_query("SELECT * FROM Organizers WHERE OID = ?", [$event['OID']]);
+    error_log("Organizer found: " . json_encode($organizer)); // Log organizer data
+
     $organizerData = $organizer ? [
         "id" => (string)$organizer[0]['OID'],
         "name" => $organizer[0]['OName'],
@@ -89,6 +104,8 @@ try {
 
     // Fetch coordinators for the event
     $eventCoordinators = db_query("SELECT * FROM Coordinators WHERE CID = ?", [$event['CID']]);
+    error_log("Event coordinators found: " . json_encode($eventCoordinators)); // Log event coordinators data
+
     $eventCoordinatorsData = [];
     foreach ($eventCoordinators as $coordinator) {
         $eventCoordinatorsData[] = [
@@ -117,8 +134,11 @@ try {
 
     // Send response
     echo json_encode($response, JSON_PRETTY_PRINT);
+    error_log("Response sent: " . json_encode($response)); // Log the final response
 
 } catch (Exception $e) {
+    // Log error details and send response
+    error_log("Error: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(["error" => $e->getMessage()]);
 }

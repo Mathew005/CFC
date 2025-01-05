@@ -68,7 +68,7 @@ try {
                         EType as category
                    FROM Events
                    JOIN Organizers ON Events.OID = Organizers.OID
-                   WHERE Published = 0 AND Cancelled = 0";
+                   WHERE Published = 1 AND Cancelled = 0";
 
     $programs_sql = "SELECT 
                          PID as id,
@@ -81,7 +81,7 @@ try {
                          PType as subcategory,
                          (SELECT EName FROM Events WHERE Events.EID = Programs.EID) as event
                     FROM Programs
-                    WHERE Open = 1";
+                    WHERE Open = 1 AND (SELECT Published FROM Events WHERE Events.EID = Programs.EID) = 1 AND (SELECT Cancelled FROM Events WHERE Events.EID = Programs.EID) = 0";
 
     // Set parameters for queries
     $params = [':api_host' => $img_host];
