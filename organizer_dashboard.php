@@ -16,7 +16,7 @@ include_once 'db_util.php';
 $img_host = DB_PROTOCOL . DB_HOST . "/" . DB_NAME . "/";
 
 // Function to determine the event status
-function determine_event_status($startDate, $endDate, $published, $cancelled) {
+function determine_event_status($startDate, $endDate, $cancelled) {
     $currentDate = new DateTime();
     $startDate = new DateTime($startDate);
     $endDate = new DateTime($endDate);
@@ -49,7 +49,7 @@ $events = db_query($sql);
 // Process and format the events data
 $processed_events = [];
 foreach ($events as $event) {
-    $status = determine_event_status($event['date'], $event['EndDate'], $event['published'], $event['cancelled']);
+    $status = determine_event_status($event['date'], $event['EndDate'], $event['cancelled']);
     $processed_events[] = [
         "id" => $event['id'],
         "name" => $event['name'],

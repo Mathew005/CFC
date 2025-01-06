@@ -18,6 +18,22 @@ include_once 'db_util.php';
 // Define the image host
 $img_host = DB_PROTOCOL . DB_HOST . "/" . DB_NAME . "/";
 
+function determine_event_status($startDate, $endDate, $cancelled) {
+    $currentDate = new DateTime();
+    $startDate = new DateTime($startDate);
+    $endDate = new DateTime($endDate);
+
+    if ($cancelled) {
+        return "cancelled";
+    } elseif ($currentDate < $startDate) {
+        return "scheduled";
+    } elseif ($currentDate >= $startDate && $currentDate <= $endDate) {
+        return "commencing";
+    } else {
+        return "concluded";
+    }
+}
+
 // Function to fetch and structure the data
 try {
     // Check if EID parameter is set
@@ -55,6 +71,7 @@ try {
                     "role" => "Program Coordinator", // Assuming a default role, can be modified
                     "email" => $coordinators[0]["Email$i"],
                     "phone" => $coordinators[0]["Phone$i"],
+                    "faculty" => $coordinators[0]["Faculty$i"],
                 ];
             }
         }
@@ -69,7 +86,7 @@ try {
             "regFee" => (float)$program['Fee'],
             "image" => $img_host . $program['PImage'] . "?height=200&width=200",
             "rulesRegulations" => $program['PDecription'],
-            "rulesRegulationsFile" => $program['PDF'],
+            "rulesRegulationsFile" => $img_host . $program['PDF'],
             "isTeamEvent" => $program['Min'] > 1,
             "minParticipants" => (int)$program['Min'],
             "maxParticipants" => (int)$program['Max'],
@@ -90,9 +107,12 @@ try {
                 "role" => "Event Coordinator", // Assuming a default role, can be modified
                 "email" => $eventCoordinator[0]["Email$i"],
                 "phone" => $eventCoordinator[0]["Phone$i"],
+                "faculty" => $eventCoordinator[0]["Faculty$i"],
             ];
         }
     }
+
+    
 
     // Structure event data
     $response = [
@@ -105,8 +125,8 @@ try {
         "location" => $event['ELocation'],
         "coordinators" => $eventCoordinatorsData,
         "programs" => $programsData,
-        "status" => 'scheduled', // Assuming the event status is always scheduled
-        "view" => 'staged', // Assuming the view status
+        "status" => determine_event_status($event['EStartDate'], $event['EndDate'], $event['Cancelled']), // Assuming the event status is always scheduled
+        "view" => ($event['Published'] == '1')?'published':'staged',
     ];
 
     // Send response

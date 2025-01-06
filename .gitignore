@@ -1,1 +1,4 @@
-file/imgs/avatars/*
+*.jpg
+*.png
+*.pdf
+*.jpeg

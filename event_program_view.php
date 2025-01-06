@@ -59,13 +59,20 @@ try {
         error_log("Coordinators found for program: " . json_encode($coordinators)); // Log coordinators data
 
         $coordinatorsData = [];
-        foreach ($coordinators as $coordinator) {
-            $coordinatorsData[] = [
-                "name" => $coordinator['Name1'],
-                "email" => $coordinator['Email1'],
-                "phone" => $coordinator['Phone1'],
-                "isFaculty" => (bool)$coordinator['Faculty1'],
-            ];
+        for ($i = 1; $i <= 4; $i++) { // Assuming there are at most 4 coordinators
+            $nameKey = "Name$i";
+            $emailKey = "Email$i";
+            $phoneKey = "Phone$i";
+            $facultyKey = "Faculty$i";
+
+            if (isset($coordinators[0][$nameKey]) && !empty($coordinators[0][$nameKey])) {
+                $coordinatorsData[] = [
+                    "name" => $coordinators[0][$nameKey],
+                    "email" => $coordinators[0][$emailKey],
+                    "phone" => $coordinators[0][$phoneKey],
+                    "isFaculty" => (bool)$coordinators[0][$facultyKey],
+                ];
+            }
         }
 
         $programsData[] = [
@@ -108,13 +115,20 @@ try {
     error_log("Event coordinators found: " . json_encode($eventCoordinators)); // Log event coordinators data
 
     $eventCoordinatorsData = [];
-    foreach ($eventCoordinators as $coordinator) {
-        $eventCoordinatorsData[] = [
-            "name" => $coordinator['Name1'],
-            "email" => $coordinator['Email1'],
-            "phone" => $coordinator['Phone1'],
-            "isFaculty" => (bool)$coordinator['Faculty1'],
-        ];
+    for ($i = 1; $i <= 4; $i++) { // Assuming there are at most 4 coordinators
+        $nameKey = "Name$i";
+        $emailKey = "Email$i";
+        $phoneKey = "Phone$i";
+        $facultyKey = "Faculty$i";
+
+        if (isset($eventCoordinators[0][$nameKey]) && !empty($eventCoordinators[0][$nameKey])) {
+            $eventCoordinatorsData[] = [
+                "name" => $eventCoordinators[0][$nameKey],
+                "email" => $eventCoordinators[0][$emailKey],
+                "phone" => $eventCoordinators[0][$phoneKey],
+                "isFaculty" => (bool)$eventCoordinators[0][$facultyKey],
+            ];
+        }
     }
 
     // Structure event data
@@ -123,7 +137,7 @@ try {
         "name" => $event['EName'],
         "institution" => $organizerData['institute'], // Organizer's institute
         "category" => implode(', ', array_map('ucwords', explode(',', $event['EType']))),
-        "location" => $event['ELocation'],
+        "location" => ucwords($event['ELocation']),
         "gpsLink" => $organizerData['gps'], // Organizer's GPS
         "description" => $event['EDecription'],
         "duration" => date('F j, Y', strtotime($event['EStartDate'])) . " - " . date('F j, Y', strtotime($event['EndDate'])),

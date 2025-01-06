@@ -36,13 +36,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && isset($_FI
             }
         }
 
-        // Generate a unique filename
-        if ($type == 'docs') {
-            $uniqueFileName = uniqid($type . '_', true) . ".pdf"; // Consider changing the extension based on file type
-        } else {
-            $uniqueFileName = uniqid($type . '_', true) . ".jpg"; // Consider changing the extension based on file type
+        // Get the file's MIME type to determine the extension
+        $fileTmpName = $_FILES['file']['tmp_name'];
+        $fileMimeType = mime_content_type($fileTmpName);
+
+        // Log the MIME type for debugging
+        error_log("File MIME type: " . $fileMimeType);
+
+        // Determine the file extension based on MIME type
+        switch ($fileMimeType) {
+            case 'image/jpeg':
+                $fileExtension = 'jpg';
+                break;
+            case 'image/png':
+                $fileExtension = 'png';
+                break;
+            case 'image/gif':
+                $fileExtension = 'gif';
+                break;
+            case 'application/pdf':
+                $fileExtension = 'pdf';
+                break;
+            default:
+                // If the MIME type is not recognized, return an error
+                error_log("Unsupported MIME type: " . $fileMimeType);
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Unsupported file type"
+                ]);
+                exit;
         }
-        
+
+        // Generate a unique filename with the appropriate extension
+        $uniqueFileName = uniqid($type . '_', true) . '.' . $fileExtension;
+
         $targetFile = $targetDir . $uniqueFileName;
 
         // Log the target file location for debugging
