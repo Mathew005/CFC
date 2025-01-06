@@ -78,6 +78,7 @@ try {
             "rules" => $program['PDecription'],
             "regFees" => (int)$program['Fee'],
             "isTeamEvent" => $program['Min'] > 1,
+            "pdf" => $img_host . $program['PDF'],
             "minParticipants" => (int)$program['Min'],
             "maxParticipants" => (int)$program['Max'],
             "coordinators" => $coordinatorsData,
