@@ -27,7 +27,7 @@ This backend is specifically designed to work as the backend for the frontend ap
     To make the PHP backend work on a local server, clone the repo into the `htdocs` folder of your XAMPP installation.
 
     ```bash
-    mv cfc-backend {xampp-folder}/htdocs/cfc-backend
+    mv cfc {xampp-folder}/htdocs/cfc
     ```
 
 3. **Start the Server**:
